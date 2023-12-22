@@ -52,7 +52,7 @@
 	let movies: Movie[] | undefined
 </script>
 
-<div class="mx-auto w-full bg-white p-2 max-w-xl rounded-xl text-black">
+<div class="mx-auto w-full bg-white p-2 max-w-md rounded-xl text-black">
 	<div class="relative">
 		<input
 			use:melt={$input}

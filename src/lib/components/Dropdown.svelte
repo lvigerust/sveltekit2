@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { beforeNavigate, goto, invalidateAll } from '$app/navigation'
+	import { goto, invalidateAll } from '$app/navigation'
 	import { createDropdownMenu, melt } from '@melt-ui/svelte'
 	import { page } from '$app/stores'
 
@@ -36,21 +36,17 @@
 		>Account</button
 	>
 
-	<div use:melt={$menu} class="bg-zinc-800 p-1.5 w-full max-w-40 rounded">
-		<button use:melt={$item} on:click={() => goto(`/account`)} class="item">Profile</button>
-		<button
-			use:melt={$item}
-			on:click={() => goto(`/account/${$page.data.user.username}/watchlist`)}
-			class="item"
-		>
+	<div use:melt={$menu} class="bg-zinc-800 p-1.5 w-full max-w-40 rounded shadow">
+		<a use:melt={$item} href="/account" class="item">Profile</a>
+		<a use:melt={$item} href={`/account/${$page.data.user.username}/watchlist`} class="item">
 			Watchlist
-		</button>
+		</a>
 		<button use:melt={$item} on:m-click={handleLogout} class="item">Logout</button>
 	</div>
 {/if}
 
 <style lang="postcss">
 	.item {
-		@apply block w-full text-start cursor-pointer py-1.5 px-4 text-sm font-medium rounded transition focus-visible:outline-none hover:bg-zinc-700 focus-visible:bg-zinc-700 hover:text-white focus-visible:text-white;
+		@apply block w-full text-start cursor-pointer py-1.5 pl-3 pr-4 text-sm font-medium rounded transition focus-visible:outline-none hover:bg-zinc-700 focus-visible:bg-zinc-700 hover:text-white focus-visible:text-white;
 	}
 </style>

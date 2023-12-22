@@ -30,7 +30,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 		.filter((movie) => movie.vote_count > 250)
 
 	if (filteredData.length) {
-		return json(filteredData)
+		return json(filteredData.slice(0, 8))
 	} else {
 		return json(
 			searchData.results
