@@ -1,0 +1,20 @@
+@font-face {
+	font-family: 'Inter';
+	src: url('/fonts/Inter-VariableFont.ttf');
+}
+@font-face {
+	font-family: 'Lexend';
+	src: url('/fonts/Lexend-VariableFont.ttf');
+}
+@font-face {
+	font-family: 'Geist';
+	src: url('/fonts/Geist-VariableFont.ttf');
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	@apply antialiased bg-zinc-900 text-zinc-300;
+}
