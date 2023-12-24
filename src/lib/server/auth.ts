@@ -16,7 +16,6 @@ export const authenticateUser = async (session: string | undefined): Promise<Use
 
 		if (accountDetailsRes.ok) {
 			const accountDetailsData: User = await accountDetailsRes.json()
-			// console.log('User', accountDetailsData.username, 'authenticated.')
 
 			return accountDetailsData
 		} else {

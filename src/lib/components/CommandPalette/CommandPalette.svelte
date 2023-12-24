@@ -3,19 +3,21 @@
 	import type { Movie } from '$lib/types'
 	import { slugify } from '$lib/utils'
 	import { createCombobox, melt } from '@melt-ui/svelte'
+	import { createEventDispatcher } from 'svelte'
 	import { slide } from 'svelte/transition'
-
-	let debounceTimer: ReturnType<typeof setTimeout>
-
-	const debounce = (callback: () => void) => {
-		clearTimeout(debounceTimer)
-		debounceTimer = setTimeout(callback, 500)
-	}
 
 	const {
 		elements: { menu, input, option },
 		states: { open, inputValue, selected }
 	} = createCombobox<Movie>()
+
+	const dispatch = createEventDispatcher()
+
+	let debounceTimer: ReturnType<typeof setTimeout>
+	const debounce = (callback: () => void) => {
+		clearTimeout(debounceTimer)
+		debounceTimer = setTimeout(callback, 500)
+	}
 
 	function search(event: KeyboardEvent) {
 		if ($inputValue) {
@@ -45,7 +47,7 @@
 	}
 
 	$: if ($selected) {
-		$open = false
+		dispatch('close')
 		goto(`/movie/${$selected.value.id}-${slugify($selected.value.title)}`)
 	}
 

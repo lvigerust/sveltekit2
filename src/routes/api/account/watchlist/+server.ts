@@ -3,12 +3,12 @@ import { json } from '@sveltejs/kit'
 
 export const POST = async ({ fetch, cookies, request }) => {
 	const requestData = await request.json()
-
 	const { media_type, media_id, watchlist } = requestData
 
 	const watchlistURL = `https://api.themoviedb.org/3/account/8629851/watchlist?session_id=${cookies.get(
 		'session'
 	)}`
+
 	const options = {
 		method: 'POST',
 		headers: {
@@ -21,9 +21,13 @@ export const POST = async ({ fetch, cookies, request }) => {
 
 	const response = await fetch(watchlistURL, options)
 
-	if (response.ok) {
-		return json({ success: true })
-	} else console.error(response.status, response.statusText)
+	if (!response.ok) {
+		console.error(response.status, response.statusText)
+	}
 
-	return new Response()
+	const data: { status_code: number; status_message: string } = await response.json()
+
+	console.log(watchlist ? 'Added' : 'Removed', requestData, watchlist ? 'to' : 'from', 'watchlist.')
+
+	return json({ status: data.status_code, message: data.status_message })
 }

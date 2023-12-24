@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { watchlist } from '../../api/account/watchlist/watchlist.js'
+	import AddWatchlist from './AddWatchlist.svelte'
 
 	export let data
 
@@ -7,6 +7,7 @@
 		movie,
 		movie: { account_states },
 		movie: { credits },
+		streamed: { imdbRating },
 		user
 	} = data)
 
@@ -18,10 +19,5 @@
 </hgroup>
 
 {#if user}
-	<button
-		on:click={() => watchlist('movie', movie.id, !account_states?.watchlist)}
-		class="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded"
-	>
-		{account_states?.watchlist ? 'Remove from watchlist' : 'Add to watchlist'}
-	</button>
+	<AddWatchlist mediaItem={movie} add={!account_states.watchlist} />
 {/if}

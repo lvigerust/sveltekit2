@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Navbar } from '$components'
+	import { Navbar, Toaster } from '$components'
 	import '../app.css'
 </script>
 
@@ -9,6 +9,8 @@
 
 <Navbar />
 
-<div class="container px-4 2xl:px-0 pt-40">
+<div class="container px-4 2xl:px-0 pt-12">
 	<slot />
 </div>
+
+<Toaster />

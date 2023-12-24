@@ -1,18 +1,13 @@
 <script lang="ts">
-	import { onNavigate } from '$app/navigation'
-	import { CommandPalette } from '$components'
 	import { createDialog, melt } from '@melt-ui/svelte'
 	import { fade, fly } from 'svelte/transition'
 	import { Search } from 'lucide-svelte'
+	import CommandPalette from './CommandPalette.svelte'
 
 	const {
 		elements: { trigger, overlay, content, portalled },
 		states: { open }
 	} = createDialog()
-
-	onNavigate(() => {
-		$open = false
-	})
 
 	function handleOpen(e: KeyboardEvent) {
 		if (e.key === '.' && (e.metaKey || e.ctrlKey)) {
@@ -45,7 +40,7 @@
 			out:fade={{ duration: 100 }}
 		>
 			<div>
-				<CommandPalette />
+				<CommandPalette on:close={() => ($open = false)} />
 				<p class="text-center font-medium mt-6 text-sm select-none">Or press anywhere to close</p>
 			</div>
 		</div>

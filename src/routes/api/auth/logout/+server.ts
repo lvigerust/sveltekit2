@@ -28,5 +28,5 @@ export const DELETE: RequestHandler = async ({ fetch, cookies }) => {
 		cookies.delete('request_token', { path: '/' })
 		console.log('Deleted session and cookies.')
 	}
-	return json({ success: true })
+	return json({ success: logoutData.success })
 }

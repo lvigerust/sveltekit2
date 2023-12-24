@@ -26,7 +26,6 @@ export const load = async ({ fetch, cookies, url }) => {
 				approveTokenLink: `https://www.themoviedb.org/authenticate/${requestToken}?redirect_to=${url.origin}/login`
 			}
 		} else {
-			console.log(url)
 			console.log('Getting request token...')
 			const apiUrl = 'https://api.themoviedb.org/3/authentication/token/new'
 			const options = {
