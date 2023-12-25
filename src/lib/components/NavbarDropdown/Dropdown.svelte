@@ -24,7 +24,7 @@
 {:else}
 	<button
 		use:melt={$trigger}
-		class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-full p-1 bg-zinc-800/50"
+		class="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-full p-0.5 bg-zinc-800/50"
 	>
 		<Avatar />
 	</button>

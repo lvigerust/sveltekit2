@@ -18,7 +18,7 @@
 		.toUpperCase()
 </script>
 
-<div class="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-800/50">
+<div class="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-zinc-800/50">
 	<img use:melt={$image} alt="Avatar" class="h-full w-full rounded-[inherit]" />
 	<span use:melt={$fallback} class="font-medium">{initals}</span>
 </div>

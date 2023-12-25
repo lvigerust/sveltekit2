@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import type { Movie } from '$lib/types'
+	import type { Movie, Show } from '$lib/types'
 	import { slugify } from '$lib/utils'
 	import { createCombobox, melt } from '@melt-ui/svelte'
+	import { error, type NumericRange } from '@sveltejs/kit'
 	import { createEventDispatcher } from 'svelte'
-	import { slide } from 'svelte/transition'
+	import { fade, slide } from 'svelte/transition'
+	import type { Media } from '../../../routes/api/search/multi/+server'
+	import { Info } from 'lucide-svelte'
 
 	const {
 		elements: { menu, input, option },
 		states: { open, inputValue, selected }
-	} = createCombobox<Movie>()
+	} = createCombobox<Media>()
 
 	const dispatch = createEventDispatcher()
 
@@ -23,7 +26,7 @@
 		if ($inputValue) {
 			if ($inputValue.trim() && $inputValue.trim() !== previousQuery) {
 				debounce(() => {
-					getMovies()
+					getResults()
 				})
 			}
 		}
@@ -33,25 +36,56 @@
 
 			if (!$inputValue) {
 				$open = false
-				movies = undefined
+				movies = null
+				shows = null
 			}
 		}
 	}
 
-	let previousQuery: string
-	async function getMovies() {
-		const query = $inputValue.trim()
+	async function getResults() {
+		let query = $inputValue.trim()
 		previousQuery = query
 
-		movies = await fetch(`/api/search/movie?query=${query}`).then((r) => r.json())
+		let mediaTypeRegex = query.match(/#(\w+)/)
+		const media_Type = mediaTypeRegex ? mediaTypeRegex[1] : null
+
+		const media_type_filter_query =
+			media_Type === 'movie' || (media_Type === 'tv' ? `&media_type=${media_Type}` : '')
+		const no_filter_query = media_Type === 'nofilter' ? '&nofilter=true' : ''
+
+		query = query
+			.replace(/#(\w+)/, '')
+			.replace(/\s+/g, ' ')
+			.trim()
+
+		const response = await fetch(
+			`/api/search/multi?query=${query}${media_type_filter_query}${no_filter_query}`
+		)
+
+		if (!response.ok) {
+			error(
+				response.status >= 400 && response.status <= 599
+					? (response.status as NumericRange<400, 599>)
+					: (404 as NumericRange<400, 599>),
+				response.statusText
+			)
+		}
+
+		const data = await response.json()
+
+		movies = data.movies
+		shows = data.shows
 	}
 
 	$: if ($selected) {
+		const { title, name } = $selected.value
 		dispatch('close')
-		goto(`/movie/${$selected.value.id}-${slugify($selected.value.title)}`)
+		goto(`/${$selected.value.media_type}/${$selected.value.id}-${slugify(title || name || '')}`)
 	}
 
-	let movies: Movie[] | undefined
+	let previousQuery: string
+	let movies: Movie[] | null
+	let shows: Show[] | null
 </script>
 
 <div class="mx-auto w-full bg-white p-2 max-w-md rounded-xl text-black">
@@ -61,31 +95,78 @@
 			on:keydown={search}
 			autocomplete="off"
 			class="w-full rounded-md border-0 bg-zinc-200 px-4 py-2.5 placeholder:text-zinc-600 focus-visible:outline-none sm:text-sm focus:ring-0"
-			placeholder="Search for movie..."
+			placeholder="Search for a movie or TV Show..."
 		/>
 
-		<!-- <div class="p-1.5 pl-0 flex right-0 inset-y-0 absolute">
-			<kbd class="text-zinc-500 text-[14px] px-2 items-center inline-flex">⌘ K</kbd>
-		</div> -->
+		{#if !$inputValue}
+			<div
+				class="absolute cursor-pointer top-1/2 -translate-y-1/2 right-3"
+				title="Type #movie or #tv to filter results."
+				transition:fade
+			>
+				<Info class="text-gray-500/75 w-4 h-4" />
+			</div>
+		{/if}
 	</div>
 
-	{#if $open && movies?.length}
-		<ul class="bg-white mt-4 p-2 rounded-xl" use:melt={$menu} in:slide>
-			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-			{#each movies as movie}
-				<li
-					use:melt={$option({
-						value: movie,
-						label: movie.title
-					})}
-					class=" cursor-pointer text-gray-900 rounded-md px-4 py-2.5 data-[highlighted]:bg-indigo-600 data-[highlighted]:text-white font-medium"
-				>
-					<div class="flex text-sm justify-between">
-						<p>{movie.title}</p>
-						<p>{new Date(movie.release_date).getFullYear()}</p>
-					</div>
+	{#if ($open && movies?.length) || shows?.length}
+		<ul
+			class="bg-white mt-4 p-2 rounded-xl max-h-[28rem] scroll-py-2 scroll-pt-12 overflow-y-auto"
+			use:melt={$menu}
+			transition:slide
+		>
+			{#if movies?.length}
+				<li>
+					<h2 class="text-xs font-semibold px-3 mt-4 mb-2 text-gray-500">
+						{movies.length > 1 ? 'Movies' : 'Movie'}
+					</h2>
+					<ul>
+						{#each movies as movie}
+							<li
+								use:melt={$option({
+									value: movie,
+									label: movie.title
+								})}
+								class=" cursor-pointer text-gray-900 rounded-md px-4 py-2.5 data-[highlighted]:bg-indigo-600 data-[highlighted]:text-white font-medium"
+							>
+								<div class="flex text-sm justify-between">
+									<p>{movie.title}</p>
+
+									{#if movie.release_date}
+										<p>{new Date(movie.release_date).getFullYear()}</p>
+									{:else}
+										<p>N/A</p>
+									{/if}
+								</div>
+							</li>
+						{/each}
+					</ul>
 				</li>
-			{/each}
+			{/if}
+
+			{#if shows?.length}
+				<li>
+					<h2 class="text-xs font-semibold px-3 mt-4 mb-2 text-gray-500">
+						{shows.length > 1 ? 'TV Shows' : 'TV Show'}
+					</h2>
+					<ul>
+						{#each shows as show}
+							<li
+								use:melt={$option({
+									value: show,
+									label: show.name
+								})}
+								class=" cursor-pointer text-gray-900 rounded-md px-4 py-2.5 data-[highlighted]:bg-indigo-600 data-[highlighted]:text-white font-medium"
+							>
+								<div class="flex text-sm justify-between">
+									<p>{show.name}</p>
+									<p>{new Date(show.first_air_date).getFullYear()}</p>
+								</div>
+							</li>
+						{/each}
+					</ul>
+				</li>
+			{/if}
 		</ul>
 	{/if}
 </div>

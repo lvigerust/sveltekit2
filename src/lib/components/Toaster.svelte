@@ -51,7 +51,7 @@
 				<div class="ml-4 flex shrink-0">
 					<button
 						use:melt={$close(id)}
-						class="rounded-md inline-flex text-zinc-400 hover:text-zinc-200 transition"
+						class=" inline-flex text-zinc-400 hover:text-zinc-200 transition focus-visible:outline-none focus-visible:bg-zinc-700/30 focus-visible:text-zinc-300/90 rounded p-0.5 focus-visible:ring-1 focus-visible:ring-zinc-100/10"
 						aria-label="close notification"
 					>
 						<X class="w-4 h-4" />
