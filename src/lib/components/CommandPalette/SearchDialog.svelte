@@ -11,7 +11,8 @@
 
 	function handleOpen(e: KeyboardEvent) {
 		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-			$open = true
+			e.preventDefault()
+			$open = !$open
 		}
 	}
 </script>
@@ -21,6 +22,7 @@
 <button
 	use:melt={$trigger}
 	class="transition hover:bg-zinc-700/50 p-2.5 rounded-full focus-visible:outline-none focus-visible:bg-zinc-700/50"
+	aria-label="Open search command palette"
 >
 	<Search class="h-5 w-5" />
 </button>

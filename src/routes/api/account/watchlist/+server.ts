@@ -27,7 +27,12 @@ export const POST = async ({ fetch, cookies, request }) => {
 
 	const data: { status_code: number; status_message: string } = await response.json()
 
-	console.log(watchlist ? 'Added' : 'Removed', requestData, watchlist ? 'to' : 'from', 'watchlist.')
+	console.log(
+		watchlist ? 'Added' : 'Removed',
+		{ media_type, media_id },
+		watchlist ? 'to' : 'from',
+		'watchlist.'
+	)
 
 	return json({ status: data.status_code, message: data.status_message })
 }

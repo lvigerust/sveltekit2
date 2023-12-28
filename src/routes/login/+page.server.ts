@@ -71,6 +71,7 @@ export const load = async ({ fetch, cookies, url }) => {
 				secure: process.env.NODE_env === 'production',
 				maxAge: 60 * 60 * 24 * 30
 			})
+			cookies.delete('request_token', { path: '/' })
 			console.log('Logged in.')
 
 			redirect(303, '/account')

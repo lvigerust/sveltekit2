@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { ApiResponse, Movie } from '$lib/types.js'
 	import { imageLoader, slugify } from '$lib/utils.js'
-	import { fly } from 'svelte/transition'
 
 	export let data
 

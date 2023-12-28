@@ -3,11 +3,9 @@
 	import type { Movie, Show } from '$lib/types'
 	import { slugify } from '$lib/utils'
 	import { createCombobox, melt } from '@melt-ui/svelte'
-	import { error, type NumericRange } from '@sveltejs/kit'
 	import { createEventDispatcher } from 'svelte'
 	import { fade, slide } from 'svelte/transition'
-	import type { Media } from '../../../routes/api/search/multi/+server'
-	import { Info } from 'lucide-svelte'
+	import type { Media } from '../../../routes/api/search/+server'
 
 	const {
 		elements: { menu, input, option },
@@ -22,89 +20,97 @@
 		debounceTimer = setTimeout(callback, 500)
 	}
 
-	function search(event: KeyboardEvent) {
-		if ($inputValue) {
-			if ($inputValue.trim() && $inputValue.trim() !== previousQuery) {
-				debounce(() => {
-					getResults()
-				})
-			}
-		}
+	async function search() {
+		let query = $inputValue.trim()
 
-		if (event.key === 'Enter' && !$selected) {
-			$open = !$open
-
-			if (!$inputValue) {
-				$open = false
+		if (query !== previousQuery) {
+			if (!query) {
+				previousQuery = ''
 				movies = null
 				shows = null
+				return
 			}
-		}
-	}
+			previousQuery = query
 
-	async function getResults() {
-		let query = $inputValue.trim()
-		previousQuery = query
+			const hashtags = query.match(/#\w+/g)
+			const nofilter = hashtags?.find((item) => item === '#nofilter') ? true : false
+			const media_type =
+				hashtags?.find((item) => item === '#movie' || item === '#tv')?.slice(1) ?? 'multi'
 
-		let mediaTypeRegex = query.match(/#(\w+)/)
-		const media_Type = mediaTypeRegex ? mediaTypeRegex[1] : null
+			query = query
+				.replace(/#(\w+)/g, '')
+				.replace(/\s+/g, ' ')
+				.trim()
 
-		const media_type_filter_query =
-			media_Type === 'movie' || (media_Type === 'tv' ? `&media_type=${media_Type}` : '')
-		const no_filter_query = media_Type === 'nofilter' ? '&nofilter=true' : ''
+			console.log('Fetching:', query)
 
-		query = query
-			.replace(/#(\w+)/, '')
-			.replace(/\s+/g, ' ')
-			.trim()
-
-		const response = await fetch(
-			`/api/search/multi?query=${query}${media_type_filter_query}${no_filter_query}`
-		)
-
-		if (!response.ok) {
-			error(
-				response.status >= 400 && response.status <= 599
-					? (response.status as NumericRange<400, 599>)
-					: (404 as NumericRange<400, 599>),
-				response.statusText
+			const response = await fetch(
+				`/api/search?query=${query}&media_type=${media_type}&no_filter=${nofilter}`
 			)
+
+			const data = await response.json()
+
+			movies = data.movies
+			shows = data.shows
 		}
-
-		const data = await response.json()
-
-		movies = data.movies
-		shows = data.shows
 	}
 
 	$: if ($selected) {
-		const { title, name } = $selected.value
+		const { title, name, media_type } = $selected.value
 		dispatch('close')
-		goto(`/${$selected.value.media_type}/${$selected.value.id}-${slugify(title || name || '')}`)
+		goto(`/${media_type}/${$selected.value.id}-${slugify(title || name || '')}`)
 	}
 
 	let previousQuery: string
 	let movies: Movie[] | null
 	let shows: Show[] | null
+
+	// Test ground
+	$: tags = $inputValue.match(/#\w+/g)
+
+	let newTags: string[] = ['movie']
+
+	let tag: string = ''
+
+	function removeTag(index: number) {
+		newTags.splice(index, 1)
+	}
+
+	function addTag() {
+		let v = tag.trim()
+		if (v === '') {
+			return
+		}
+		newTags = [...newTags, v]
+		tag = ''
+	}
 </script>
 
 <div class="mx-auto w-full bg-white p-2 max-w-md rounded-xl text-black">
 	<div class="relative">
 		<input
 			use:melt={$input}
-			on:keydown={search}
+			on:keydown={() =>
+				debounce(() => {
+					search()
+				})}
 			autocomplete="off"
 			class="w-full rounded-md border-0 bg-zinc-200 px-4 py-2.5 placeholder:text-zinc-600 focus-visible:outline-none sm:text-sm focus:ring-0"
 			placeholder="Search for a movie or TV Show..."
 		/>
 
-		{#if !$inputValue}
-			<div
-				class="absolute cursor-pointer top-1/2 -translate-y-1/2 right-3"
-				title="Type #movie or #tv to filter results."
-				transition:fade
-			>
-				<Info class="text-gray-500/75 w-4 h-4" />
+		{#if tags}
+			<div class="absolute top-1/2 -translate-y-1/2 right-3 flex gap-1" transition:fade>
+				{#each tags as tag}
+					<span
+						class="rounded-full bg-indigo-100 px-3 py-1 select-none text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10"
+						>{tag.slice(1)}</span
+					>
+				{/each}
+
+				<!-- <Info class="text-gray-500/75 size-4" /> -->
+
+				<!-- <kbd class="tracking-tighter text-sm">⌘ + K</kbd> -->
 			</div>
 		{/if}
 	</div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog, Dropdown } from '$components'
+	import { SearchDialog, Dropdown } from '$components'
 	import { page } from '$app/stores'
 
 	$: ({ user } = $page.data)
@@ -52,7 +52,7 @@
 
 	<div class="navbar-end w-1/2 justify-end items-center gap-x-4 flex">
 		<div>
-			<Dialog />
+			<SearchDialog />
 		</div>
 		<div>
 			<Dropdown />

@@ -1,6 +1,6 @@
 import { TMDB_ACCESS_TOKEN } from '$env/static/private'
 import type { ApiResponse } from '$lib/types'
-import { error, json, type NumericRange, type RequestHandler } from '@sveltejs/kit'
+import { json, type RequestHandler } from '@sveltejs/kit'
 
 export interface Media {
 	adult: boolean
@@ -22,8 +22,8 @@ export interface Media {
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const query = url.searchParams.get('query')
-	const media_type = url.searchParams.get('media_type') ?? 'multi'
-	const nofilter = Boolean(url.searchParams.get('nofilter'))
+	const media_type = url.searchParams.get('media_type')
+	const no_filter = JSON.parse(url.searchParams.get('no_filter') ?? 'false')
 
 	const queryURL = `https://api.themoviedb.org/3/search/${media_type}?query=${query}&include_adult=false&language=en-US&page=1`
 	const options = {
@@ -37,19 +37,14 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	const searchRes = await fetch(queryURL, options)
 
 	if (!searchRes.ok) {
-		error(
-			searchRes.status >= 400 && searchRes.status <= 599
-				? (searchRes.status as NumericRange<400, 599>)
-				: (404 as NumericRange<400, 599>),
-			searchRes.statusText
-		)
+		return json({ status: searchRes.status, message: searchRes.statusText })
 	}
 
 	const searchData: ApiResponse<Media> = await searchRes.json()
 	let movies, shows: Media[]
 
 	function filterResults(list: Media[]) {
-		if (nofilter) {
+		if (no_filter) {
 			return list.sort((a, b) => b.popularity - a.popularity)
 		}
 

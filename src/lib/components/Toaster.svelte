@@ -31,7 +31,7 @@
 			animate:flip={{ duration: 500 }}
 			in:fly={{ duration: 150, x: '100%' }}
 			out:fly={{ duration: 150, x: '100%' }}
-			class="rounded-lg bg-zinc-800/90 backdrop-blur text-white shadow-md w-full min-w-72 max-w-[24rem] p-4"
+			class="rounded-lg bg-zinc-800/90 backdrop-blur text-white shadow-md w-[24rem] max-w-[calc(100vw-2rem)] p-4"
 		>
 			<div class="flex items-start w-full">
 				<div class="shrink-0">

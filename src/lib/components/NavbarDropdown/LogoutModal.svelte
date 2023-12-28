@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation'
-	import { addToast } from '$components'
+	import { toast } from '$components'
 	import { createDialog, melt } from '@melt-ui/svelte'
 	import { LogOut } from 'lucide-svelte'
 	import { createEventDispatcher } from 'svelte'
@@ -15,11 +15,8 @@
 
 			if (data.success) {
 				invalidateAll()
-				addToast({
-					data: {
-						title: 'Success',
-						description: 'You have been logged out.'
-					}
+				toast('Success', {
+					description: 'You have been logged out.'
 				})
 			}
 		}
@@ -54,7 +51,7 @@
 			class="fixed left-[50%] top-[50%] flex items-center text-center flex-col z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] rounded-xl bg-zinc-800 p-6 shadow-lg ring-1 ring-zinc-600/25"
 		>
 			<div class="mb-6 bg-zinc-700/40 rounded-full p-4 ring-1 ring-zinc-100/10">
-				<LogOut class="w-5 h-5" />
+				<LogOut class="size-5" />
 			</div>
 
 			<h2 use:melt={$title} class="font-medium text-zinc-50 mb-2">Leave the movie magic behind?</h2>

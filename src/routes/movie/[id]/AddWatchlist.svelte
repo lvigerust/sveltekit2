@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation'
-	import { addToast } from '$components'
+	import { toast } from '$components'
 	import type { Movie, Show } from '$lib/types'
 	import { Bookmark } from 'lucide-svelte'
-	import { fade, fly, scale } from 'svelte/transition'
+	import { fade } from 'svelte/transition'
 
 	export let mediaItem: Movie | Show
 	export let add: boolean = true
@@ -20,10 +20,7 @@
 		} else return mediaItem.name
 	}
 
-	$: buttonText = add ? 'Add to watchlist' : 'Remove from watchlist'
-
 	async function watchlist() {
-		buttonText = add ? 'Adding...' : 'Removing...'
 		const response = await fetch(`/api/account/watchlist`, {
 			method: 'POST',
 			body: JSON.stringify({
@@ -35,13 +32,11 @@
 
 		if ((await response.status) === 1 || 13) {
 			invalidateAll()
-			addToast({
-				data: {
-					title: 'Watchlist updated',
-					description: `${getTitle(mediaItem)} ${
-						response.status === 1 ? 'added to your watchlist.' : 'was removed from your watchlist.'
-					}`
-				}
+
+			toast.success('Watchlist updated', {
+				description: `${getTitle(mediaItem)} ${
+					response.status === 1 ? 'added to your watchlist.' : 'was removed from your watchlist.'
+				}`
 			})
 		}
 	}

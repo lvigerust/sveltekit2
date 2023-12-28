@@ -13,4 +13,4 @@
 	<slot />
 </div>
 
-<Toaster />
+<Toaster richColors />
